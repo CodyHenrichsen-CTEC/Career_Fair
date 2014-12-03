@@ -62,7 +62,7 @@ namespace Career_Fair.view
             if (userChoice == DialogResult.OK)
             {
                 workshopDataPath = openFileDialog1.FileName;
-                currentData.WorkshopInfoFilePath = WorkshopDataFilePath;
+                currentData.WorkshopInfoFilePath = workshopDataPath;
                 chooseStudentRequestButton.Enabled = true;
             }
             
@@ -80,7 +80,7 @@ namespace Career_Fair.view
             {
                 generateScheduleButton.Enabled = true;
                 studentDataPath = openFileDialog1.FileName;
-                currentData.RequestFilePath = StudentDataFilePath;
+                currentData.RequestFilePath = studentDataPath;
             }
         }
 

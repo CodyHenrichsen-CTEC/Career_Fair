@@ -17,30 +17,19 @@ namespace Career_Fair.model
         
         private string requestFilePath, workshopInfoFilePath, statusText, failedCutoff, exceedsCount, exceedsMessage;
         private DateTime cutoffTime;
-        //private DataTable roomTable, schoolTable, districtTable, presenterTable, requestTable, studentTable, sessionTable;
-        //private Dictionary<String, Int32> AllClasses, ThirdClasses, SecondClasses, FirstClasses;
         private Dictionary<String, Int32> PopularClasses, FourthClasses, ThirdClasses, SecondClasses, FirstClasses;
         
-        private List <DistrictClass> districtClassCount;
         private List<Session> stillOneBlank, stillTwoBlank, stillThreeBlank;
-        private List<DistrictClass> stupidList;
-
+        
         private bool okToSchedule;
 
         private List <Room> roomList;
-        private List <School> schoolList;
-        private List <District> districtList;
         private List <Presenter> presenterList; 
         private List <Request> requestList;
         private List <Student> studentList;
         private List <Session> sessionList;
 
-        public List<District> DistrictList
-        {
-            get { return districtList; }
-            set { districtList = value; }
-        }
-
+        
         public bool ScheduleOK
         {
             get { return okToSchedule; }
@@ -462,24 +451,22 @@ namespace Career_Fair.model
             
             exceedsMessage =  " students exceeded district counts\n";
             statusText += exceedsMessage;
-            districtClassCount = new List<DistrictClass>();
-
-            foreach (District currentDistrict in districtList)
-            {
-                foreach (Presenter currentPresenter in presenterList)
-                {
-                    districtClassCount.Add(new DistrictClass(currentDistrict.DistrictName, currentPresenter.PresenterTitle));
-                }
-            }
-
-
-
+            
             #region Basic scheduling
             foreach (KeyValuePair<string, int> classNameAndCount in PopularClasses)
             {
                 Session currentSession = sessionList.Find(delegate(Session current) { return current.SessionPresenter.PresenterTitle.Equals(classNameAndCount.Key); });
                 Dictionary<String, Int32> currentDistrictCount = new Dictionary<string, int>();
 
+                String subTitle = "";
+                if (currentSession.SessionPresenter.PresenterTitle.IndexOf("-") != -1)
+                {
+                    subTitle = currentSession.SessionPresenter.PresenterTitle.Substring(0, currentSession.SessionPresenter.PresenterTitle.IndexOf("-"));
+                }
+                else
+                {
+                    subTitle = currentSession.SessionPresenter.PresenterTitle;
+                }
 
 
                 Room currentRoom = roomList.Find(delegate(Room tempRoom) { return tempRoom.Equals(currentSession.SessionPresenter.PresenterRoom); });
@@ -490,7 +477,7 @@ namespace Career_Fair.model
                 int currentSessionBCount = 0;
                 int currentSessionCCount = 0;
 
-                List<Request> wantedClasses = requestList.FindAll(delegate(Request tempRequest) { return (tempRequest.RequestFive.Equals(currentSession.SessionPresenter.PresenterTitle) || tempRequest.RequestFour.Equals(currentSession.SessionPresenter.PresenterTitle) || tempRequest.RequestThree.Equals(currentSession.SessionPresenter.PresenterTitle) || tempRequest.RequestTwo.Equals(currentSession.SessionPresenter.PresenterTitle) || tempRequest.RequestOne.Equals(currentSession.SessionPresenter.PresenterTitle)); });
+                List<Request> wantedClasses = requestList.FindAll(delegate(Request tempRequest) { return (tempRequest.RequestFive.Equals(subTitle) || tempRequest.RequestFour.Equals(subTitle) || tempRequest.RequestThree.Equals(subTitle) || tempRequest.RequestTwo.Equals(subTitle) || tempRequest.RequestOne.Equals(subTitle)); });
 
                 int smallTest = 0;
 
@@ -506,7 +493,7 @@ namespace Career_Fair.model
                     {
                         Student currentStudent = studentList.Find(delegate(Student temp) { return temp.Equals(currentRequest.RequestingStudent); });
                         
-                        String subTitle = "";
+                        subTitle = "";
                         if (currentSession.SessionPresenter.PresenterTitle.IndexOf("-") != -1)
                         {
                             subTitle = currentSession.SessionPresenter.PresenterTitle.Substring(0, currentSession.SessionPresenter.PresenterTitle.IndexOf("-"));
@@ -518,7 +505,7 @@ namespace Career_Fair.model
                         #region All requests will fit
                         if (classNameAndCount.Value < totalRoomCapacity)
                         {
-                            if (currentRequest.RequestOne.Equals(classNameAndCount.Key) || currentRequest.RequestTwo.Equals(classNameAndCount.Key) || currentRequest.RequestThree.Equals(classNameAndCount.Key) || currentRequest.RequestFour.Equals(classNameAndCount.Key) || currentRequest.RequestFive.Equals(classNameAndCount.Key))
+                            if (classNameAndCount.Key.Contains(currentRequest.RequestOne) || classNameAndCount.Key.Contains(currentRequest.RequestTwo) || classNameAndCount.Key.Contains(currentRequest.RequestThree) || classNameAndCount.Key.Contains(currentRequest.RequestFour) || classNameAndCount.Key.Contains(currentRequest.RequestFive))
                             {
                                 int randomizer = (currentSessionACount + currentSessionBCount + currentSessionCCount) % 3;
                                     if (randomizer == 0)
@@ -597,7 +584,7 @@ namespace Career_Fair.model
                         }
                         else if (FourthClasses[classNameAndCount.Key] < totalRoomCapacity && FourthClasses.ContainsKey(classNameAndCount.Key))
                         {
-                            if (currentRequest.RequestOne.Equals(classNameAndCount.Key) || currentRequest.RequestTwo.Equals(classNameAndCount.Key) || currentRequest.RequestThree.Equals(classNameAndCount.Key) || currentRequest.RequestFour.Equals(classNameAndCount.Key))
+                            if (classNameAndCount.Key.Contains(currentRequest.RequestOne) || classNameAndCount.Key.Contains(currentRequest.RequestTwo) || classNameAndCount.Key.Contains(currentRequest.RequestThree) || classNameAndCount.Key.Contains(currentRequest.RequestFour))
                             {
                                 
                                     int randomizer = (currentSessionACount + currentSessionBCount + currentSessionCCount) % 3;
@@ -678,7 +665,7 @@ namespace Career_Fair.model
                         }
                         else if (ThirdClasses[classNameAndCount.Key] < totalRoomCapacity && ThirdClasses.ContainsKey(classNameAndCount.Key))
                         {
-                            if (currentRequest.RequestOne.Equals(classNameAndCount.Key) || currentRequest.RequestTwo.Equals(classNameAndCount.Key) || currentRequest.RequestThree.Equals(classNameAndCount.Key))
+                            if (classNameAndCount.Key.Contains(currentRequest.RequestOne) || classNameAndCount.Key.Contains(currentRequest.RequestTwo) || classNameAndCount.Key.Contains(currentRequest.RequestThree) )
                             {
                                 
                                     int randomizer = (currentSessionACount + currentSessionBCount + currentSessionCCount) % 3;
@@ -758,7 +745,7 @@ namespace Career_Fair.model
                         }
                         else if (SecondClasses[classNameAndCount.Key] < totalRoomCapacity && SecondClasses.ContainsKey(classNameAndCount.Key))
                         {
-                            if (currentRequest.RequestOne.Equals(classNameAndCount.Key) || currentRequest.RequestTwo.Equals(classNameAndCount.Key))
+                            if (classNameAndCount.Key.Contains(currentRequest.RequestOne) || classNameAndCount.Key.Contains(currentRequest.RequestTwo) )
                             {
                                    int randomizer = (currentSessionACount + currentSessionBCount + currentSessionCCount) % 3;
                                     if (randomizer == 0)
@@ -837,7 +824,7 @@ namespace Career_Fair.model
                         }
                         else if (FirstClasses[classNameAndCount.Key] < totalRoomCapacity && FirstClasses.ContainsKey(classNameAndCount.Key))
                         {
-                            if (currentRequest.RequestOne.Equals(classNameAndCount.Key))
+                            if (classNameAndCount.Key.Contains(currentRequest.RequestOne))
                             {
                                 
                                     int randomizer = (currentSessionACount + currentSessionBCount + currentSessionCCount) % 3;
@@ -913,7 +900,7 @@ namespace Career_Fair.model
 
                         else
                         {
-                            if (currentRequest.RequestOne.Equals(classNameAndCount.Key))
+                            if (classNameAndCount.Key.Contains(currentRequest.RequestOne))
                             {
                                
                                     int randomizer = (currentSessionACount + currentSessionBCount + currentSessionCCount) % 3;
@@ -994,18 +981,15 @@ namespace Career_Fair.model
 
             }
             #endregion
+            blankStudents = studentList.FindAll(delegate(Student tempStudent) { return (tempStudent.SessionOne.Length == 0 || tempStudent.SessionTwo.Length == 0 || tempStudent.SessionThree.Length == 0); });
+
 
             extraScheduling();
 
             blankStudents = studentList.FindAll(delegate(Student tempStudent) { return (tempStudent.SessionOne.Length == 0 || tempStudent.SessionTwo.Length == 0 || tempStudent.SessionThree.Length == 0); });
 
-            List<DistrictClass> otherList = districtClassCount.FindAll(delegate(DistrictClass tempClassCount) { return (tempClassCount.Count < tempClassCount.Max); });
-
-
-            
             statusText += exceedsMessage + "\n" + blankStudents.Count + " students were not scheduled: Counts exceeded";
-
-
+            
         }
 
         private void extraScheduling()
@@ -1194,7 +1178,7 @@ namespace Career_Fair.model
             }
 
             emptyStudents = studentList.FindAll(delegate(Student tempStudent) { return (tempStudent.SessionOne.Length == 0 || tempStudent.SessionTwo.Length == 0 || tempStudent.SessionThree.Length == 0); });
-
+            statusText += "\n" + emptyStudents.Count + " students need manual schedules. Please check for them in the excel file \n marked see coordinator";
             #endregion
             
         }
@@ -1203,11 +1187,11 @@ namespace Career_Fair.model
         public void createWorkshopExportExcel()
         {
             int columnCount = 15;
-            FileInfo currentFile = new FileInfo(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal) + "\\Viking Time Schedule.xlsx");
+            FileInfo currentFile = new FileInfo(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal) + "\\Career Fair Schedule.xlsx");
             if (currentFile.Exists)
             {
                 currentFile.Delete();  // ensures we create a new workbook
-                currentFile = new FileInfo(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal) + "\\Viking Time Schedule.xlsx");
+                currentFile = new FileInfo(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal) + "\\Career Fair Schedule.xlsx");
             }
 
             using (ExcelPackage currentExcel = new ExcelPackage(currentFile))
@@ -1280,6 +1264,11 @@ namespace Career_Fair.model
                         currentSheet.Cells[currentRowCounter, 6].Value = workshopStudent.SessionOne;
                         currentSheet.Cells[currentRowCounter, 7].Value = workshopStudent.SessionOne;
                     }
+                    else if (workshopStudent.SessionOne.Length == 0)
+                    {
+                        currentSheet.Cells[currentRowCounter, 6].Value = "Check with coordinator";
+                        currentSheet.Cells[currentRowCounter, 7].Value = "schedule error";
+                    }
                     else
                     {
                         currentSheet.Cells[currentRowCounter, 6].Value = workshopStudent.SessionOne;
@@ -1291,6 +1280,11 @@ namespace Career_Fair.model
                         currentSheet.Cells[currentRowCounter, 8].Value = workshopStudent.SessionTwo;
                         currentSheet.Cells[currentRowCounter, 9].Value = workshopStudent.SessionTwo;
                     }
+                    else if (workshopStudent.SessionTwo.Length == 0)
+                    {
+                        currentSheet.Cells[currentRowCounter, 8].Value = "Check with coordinator";
+                        currentSheet.Cells[currentRowCounter, 9].Value = "schedule error";
+                    }
                     else
                     {
                         currentSheet.Cells[currentRowCounter, 8].Value = workshopStudent.SessionTwo;
@@ -1301,6 +1295,11 @@ namespace Career_Fair.model
                     {
                         currentSheet.Cells[currentRowCounter, 10].Value = workshopStudent.SessionThree;
                         currentSheet.Cells[currentRowCounter, 11].Value = workshopStudent.SessionThree;
+                    }
+                    else if (workshopStudent.SessionThree.Length == 0)
+                    {
+                        currentSheet.Cells[currentRowCounter, 10].Value = "Check with coordinator";
+                        currentSheet.Cells[currentRowCounter, 11].Value = "schedule error";
                     }
                     else
                     {
@@ -1396,11 +1395,10 @@ namespace Career_Fair.model
                 #endregion
                 currentExcel.Save();
             }
+            MessageBox.Show(statusText, "Scheduling Info");
             okToSchedule = true;
         }
 
-            //stillOneBlank = sessionList.FindAll(delegate(Session tempSession) { return (tempSession.SessionOneCount < tempSession.SessionPresenter.PresenterRoom.RoomCapacity); });
-        
         public void startSchedule()
         {
             importExcelDataToLists();
